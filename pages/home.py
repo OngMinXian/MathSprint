@@ -3,14 +3,18 @@ from dash import Dash, html, dcc, callback, Output, Input, State, callback_conte
 import dash_bootstrap_components as dbc
 
 import random
+import datetime
+import pandas as pd
+
+from s3_client import *
 
 dash.register_page(__name__, path='/')
 
-def generate_prompts(operator='Multiplication', mode='normal'):
+def generate_prompts(operator='Multiplication', difficulty='normal'):
     prompts = []
     answers = []
 
-    if mode == 'Normal':
+    if difficulty == 'Normal':
         if 'Multiplication' == operator:
             for i in range(0, 13):
                 for j in range(0, 13):
@@ -35,7 +39,7 @@ def generate_prompts(operator='Multiplication', mode='normal'):
                     prompts.append(dbc.Label(f'{i * j} / {j}'))
                     answers.append(i)
 
-    elif mode == 'Hard':
+    elif difficulty == 'Hard':
         for i in range(1000):
             i, j, k = random.randint(0, 13), random.randint(0, 13), random.randint(1, 100)
             
@@ -200,8 +204,8 @@ layout = dbc.Container(fluid=True, children=[
 
     prevent_initial_call=True,
 )
-def start_game(n_start, store, mode, operator):
-    prompts, answers = generate_prompts(operator=operator, mode=mode)
+def start_game(n_start, store, difficulty, operator):
+    prompts, answers = generate_prompts(operator=operator, difficulty=difficulty)
     first_prompt = prompts.pop(0)
     store['prompts'] = prompts
     store['answers'] = answers
@@ -211,7 +215,7 @@ def start_game(n_start, store, mode, operator):
 @callback(
     Output('math_prompt', 'children', allow_duplicate=True),
     Output('store_game', 'data', allow_duplicate=True),
-    Output('input_ans', 'value'),
+    Output('input_ans', 'value', allow_duplicate=True),
     Output('alert_correct', 'is_open'),
     Output('alert_wrong', 'is_open'),
     Output('label_score', 'children'),
@@ -253,20 +257,41 @@ def handle_timer(n_interval):
     Output('container_end', 'style', allow_duplicate=True),
     Output('container_game', 'style', allow_duplicate=True),
     Output('label_finalscore', 'children'),
+    Output('input_ans', 'value'),
 
     Input('interval_timer', 'n_intervals'),
     State('store_game', 'data'),
     Input('btn_endgame', 'n_clicks'),
 
+    State('navbar', 'brand'),
+    State('select_difficulty', 'value'),
+    State('select_operator', 'value'),
+
     prevent_initial_call=True,
 )
-def handle_endgame(n_interval, store, n_clicks):
+def handle_endgame(n_interval, store, n_clicks, brand, difficulty, operator):
     if (n_interval == 60 and 'score' in store) or \
     store.get('answers') == [] or \
     callback_context.args_grouping[2]['triggered']:
         score = store['score']
         store['score'] = -1
-        return {'display':' block'}, {'display':' none'}, f'Your final score is {score}'
+
+        # Record score into S3
+        timestamp = datetime.datetime.now()
+        username = brand[1]['props']['children'].split(' ')[1]
+        scoreboard = s3_client.get_object(Bucket='mathsprint', Key='mathsprint_scoreboard.csv')['Body']
+        df_scoreboard = pd.read_csv(scoreboard)
+        df_scoreboard = pd.concat([df_scoreboard, pd.DataFrame({
+            'timestamp': [timestamp],
+            'username': [username],
+            'difficulty': [difficulty],
+            'operator': [operator],
+            'score': [score],
+        })], axis=0, ignore_index=True)
+        df_scoreboard.to_csv('mathsprint_scoreboard.csv', index=False)
+        s3_client.upload_file(Filename = 'mathsprint_scoreboard.csv', Bucket= 'mathsprint', Key = 'mathsprint_scoreboard.csv')
+
+        return {'display':' block'}, {'display':' none'}, f'Your final score is {score}', ''
 
     else:
         return no_update

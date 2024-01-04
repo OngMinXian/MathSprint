@@ -34,7 +34,10 @@ app.layout = dbc.Container(fluid=True, children=[
                 dbc.NavItem(dbc.NavLink('Home', href='/')),
                 dbc.NavItem(dbc.NavLink('Scoreboard', href='scoreboard')),
             ],
-            brand='MathSprint',
+            brand=[
+                dbc.Label('MathSprint'),
+            ],
+            id='navbar',
             color='primary',
             dark=True,
             fluid=True,
@@ -52,15 +55,25 @@ app.layout = dbc.Container(fluid=True, children=[
     Output('username_prompt', 'style'),
     Output('navigation_bar', 'style'),
     Output('page_content', 'style'),
+    Output('navbar', 'brand'),
 
     Input('input_username', 'n_submit'),
     Input('btn_username', 'n_clicks'),
     State('input_username', 'value'),
+    State('navbar', 'brand'),
     
     prevent_initial_call=True,
 )
-def handle_username(n_enter, n_submit, username):
-    return {'display': 'none'}, {'display': 'block'}, {'display': 'block'}
+def handle_username(n_enter, n_submit, username, brand):
+    if username == '':
+        username = 'anonymous'
+        
+    brand.append(
+        dbc.Label(
+            f'Welcome {username}'
+        )
+    )
+    return {'display': 'none'}, {'display': 'block'}, {'display': 'block'}, brand
 
 # Run the app
 if __name__ == '__main__':
