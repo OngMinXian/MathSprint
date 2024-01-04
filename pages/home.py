@@ -6,14 +6,66 @@ import random
 
 dash.register_page(__name__, path='/')
 
-def generate_prompts(low=0, high=12):
+def generate_prompts(operator='Multiplication', mode='normal'):
     prompts = []
     answers = []
-    for i in range(low, high + 1):
-        for j in range(low, high + 1):
-            prompts.append(dbc.Label(f'{i} x {j}'))
-            answers.append(i * j)
-    
+
+    if mode == 'Normal':
+        if 'Multiplication' == operator:
+            for i in range(0, 13):
+                for j in range(0, 13):
+                    prompts.append(dbc.Label(f'{i} x {j}'))
+                    answers.append(i * j)
+
+        elif 'Addition' == operator:
+            for i in range(1, 101):
+                for j in range(1, 101):
+                    prompts.append(dbc.Label(f'{i} + {j}'))
+                    answers.append(i + j)
+
+        elif 'Subtraction' == operator:
+            for i in range(1, 101):
+                for j in range(1, 101):
+                    prompts.append(dbc.Label(f'{i} - {j}'))
+                    answers.append(i - j)
+
+        elif 'Division' == operator:
+            for i in range(0, 13):
+                for j in range(1, 13):
+                    prompts.append(dbc.Label(f'{i * j} / {j}'))
+                    answers.append(i)
+
+    elif mode == 'Hard':
+        for i in range(1000):
+            i, j, k = random.randint(0, 13), random.randint(0, 13), random.randint(1, 100)
+            
+            if random.randint(0, 1):
+                prompt = f'{i} * {j}'
+                answer = i * j
+            else:
+                if j == 0:
+                    continue
+                prompt = f'{i * j} / {j}'
+                answer = i
+
+            if random.randint(0, 1):
+                if random.randint(0, 1):
+                    prompt += f' + {k}'
+                else:
+                    prompt = f'{k} + ' + prompt
+                answer += k
+            else:
+                if random.randint(0, 1):
+                    prompt += f' - {k}'
+                    answer -= k
+                else:
+                    prompt = f'{k} - ' + prompt
+                    answer = k - answer
+                
+
+            prompts.append(prompt)
+            answers.append(answer)
+        
     zipped = list(zip(prompts, answers))
     random.shuffle(zipped)
     prompts, answers = zip(*zipped)
@@ -25,8 +77,35 @@ layout = dbc.Container(fluid=True, children=[
     # Start game and settings
     dbc.Container(fluid=True, children=[
 
+        # Difficulty setting
+        dbc.Label('Select difficulty:'),
+        dbc.RadioItems(
+            options=[
+                {'label': 'Normal', 'value': 'Normal'},
+                {'label': 'Hard', 'value': 'Hard'},
+            ],
+            value='Normal',
+            id='select_difficulty',
+        ),
+
+        # Operator setting
+        dbc.Container(fluid=True, children=[
+            dbc.Label('Select operator:'),
+            dbc.RadioItems(
+                options=[
+                    {'label': 'Addition', 'value': 'Addition'},
+                    {'label': 'Subtraction', 'value': 'Subtraction'},
+                    {'label': 'Multiplication', 'value': 'Multiplication'},
+                    {'label': 'Division', 'value': 'Division'},
+                ],
+                value='Multiplication',
+                id='select_operator',
+            ),
+        ], id='container_operator', style={'display': 'block'}),
+
         # Start game button
         dbc.Button('Start game', id='btn_start'),
+
 
     ], id='container_start', style={'display':' block'}),
 
@@ -79,6 +158,11 @@ layout = dbc.Container(fluid=True, children=[
             duration=2000,
         ),
 
+        # End game
+        dbc.Button(
+            'End game',
+            id='btn_endgame',
+        ),
 
     ], id='container_game', style={'display':' none'}),
 
@@ -91,7 +175,7 @@ layout = dbc.Container(fluid=True, children=[
         dbc.Button(
             'Start new game',
             id='btn_newgame',
-        )
+        ),
     ], id='container_end', style={'display':' none'}),
 
     # Store
@@ -111,11 +195,13 @@ layout = dbc.Container(fluid=True, children=[
 
     Input('btn_start', 'n_clicks'),
     State('store_game', 'data'),
+    State('select_difficulty', 'value'),
+    State('select_operator', 'value'),
 
     prevent_initial_call=True,
 )
-def start_game(n_start, store):
-    prompts, answers = generate_prompts()
+def start_game(n_start, store, mode, operator):
+    prompts, answers = generate_prompts(operator=operator, mode=mode)
     first_prompt = prompts.pop(0)
     store['prompts'] = prompts
     store['answers'] = answers
@@ -141,8 +227,12 @@ def handle_ans(n_submit, input_ans, store, curr_prompt):
     curr_ans = store['answers'][0]
     # Answered correctly
     if curr_ans == input_ans:
-        next_prompt = store['prompts'][0]
-        store['prompts'] = store['prompts'][1:]
+
+        # Still have more prompts
+        next_prompt = dbc.Label('')
+        if store['prompts'] != []:
+            next_prompt = store['prompts'][0]
+            store['prompts'] = store['prompts'][1:]
         store['answers'] = store['answers'][1:]
         store['score'] += 1
         return next_prompt, store, '', True, False, f'Score: {store["score"]}'
@@ -166,11 +256,14 @@ def handle_timer(n_interval):
 
     Input('interval_timer', 'n_intervals'),
     State('store_game', 'data'),
+    Input('btn_endgame', 'n_clicks'),
 
     prevent_initial_call=True,
 )
-def handle_endgame(n_interval, store):
-    if n_interval == 60 and 'score' in store:
+def handle_endgame(n_interval, store, n_clicks):
+    if (n_interval == 60 and 'score' in store) or \
+    store.get('answers') == [] or \
+    callback_context.args_grouping[2]['triggered']:
         score = store['score']
         store['score'] = -1
         return {'display':' block'}, {'display':' none'}, f'Your final score is {score}'
@@ -181,10 +274,19 @@ def handle_endgame(n_interval, store):
 @callback(
     Output('container_end', 'style', allow_duplicate=True),
     Output('container_start', 'style', allow_duplicate=True),
+    Output('store_game', 'data', allow_duplicate=True),
 
     Input('btn_newgame', 'n_clicks'),
 
     prevent_initial_call=True,
 )
 def handle_newgame(n_clicks):
-    return {'display':' none'}, {'display':' block'}
+    return {'display':' none'}, {'display':' block'}, {}
+
+@callback(
+    Output('container_operator', 'style'),
+    Input('select_difficulty', 'value'),
+)
+def toggle_operators_display(difficulty):
+    return {'display': 'block'} if difficulty == 'Normal' else {'display': 'none'}
+
