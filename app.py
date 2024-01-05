@@ -1,6 +1,8 @@
-from dash import dash, Dash, html, dcc, callback, Output, Input, State, callback_context, ALL, MATCH, dash_table, no_update
+# Import libraries
+from dash import dash, Dash, callback, Output, Input, State
 import dash_bootstrap_components as dbc
 
+# App config
 theme = dbc.themes.BOOTSTRAP
 icon_lib = dbc.icons.FONT_AWESOME
 bs_icon_lib = dbc.icons.BOOTSTRAP
@@ -12,6 +14,7 @@ app = Dash(
     suppress_callback_exceptions=True,
 )
 
+# App layout
 app.layout = dbc.Container(fluid=True, children=[
 
     # Username prompt
@@ -51,6 +54,7 @@ app.layout = dbc.Container(fluid=True, children=[
     
 ])
 
+# Callback functions
 @callback(
     Output('username_prompt', 'style'),
     Output('navigation_bar', 'style'),
@@ -64,7 +68,11 @@ app.layout = dbc.Container(fluid=True, children=[
     
     prevent_initial_call=True,
 )
-def handle_username(n_enter, n_submit, username, brand):
+def handle_username(n_enter: int, n_submit: int, username: str, brand: list) -> list:
+    """
+    Handles user input of username and displays it on navigation bar. The username is then retrieved
+    from the navigation bar later to record score in database.
+    """
     if username == '':
         username = 'anonymous'
         
@@ -73,7 +81,7 @@ def handle_username(n_enter, n_submit, username, brand):
             f'Welcome {username}'
         )
     )
-    return {'display': 'none'}, {'display': 'block'}, {'display': 'block'}, brand
+    return [{'display': 'none'}, {'display': 'block'}, {'display': 'block'}, brand]
 
 # Run the app
 if __name__ == '__main__':

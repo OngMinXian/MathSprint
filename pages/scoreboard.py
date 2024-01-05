@@ -1,18 +1,21 @@
+# Import libraries
 import dash
-from dash import Dash, html, dcc, callback, Output, Input, State, callback_context, ALL, MATCH, dash_table, no_update
+from dash import dcc, callback, Output, Input, State, dash_table
 import dash_bootstrap_components as dbc
-import dash_mantine_components as dmc
-from dash_iconify import DashIconify
-
-import pandas as pd
 
 import plotly.express as px
 
-from s3_client import *
+from s3_client import get_scoreboard_from_s3
 
 dash.register_page(__name__)
 
-def create_scoreboard(difficulty, operator):
+# Helper functions
+def create_scoreboard(difficulty: str, operator: str) -> dash_table.DataTable:
+    """
+    Generates a scoreboard in the form of a Dash DataTable depending on the selected
+    difficulty and operator. Scoreboard is sorted by descending score and limited to 10 scores.
+    """
+    # Retrieve scores from s3
     df_scoreboard = get_scoreboard_from_s3()
 
     # Filter df
@@ -25,6 +28,7 @@ def create_scoreboard(difficulty, operator):
     # Limit df
     df_scoreboard = df_scoreboard.head(10)
 
+    # Create scoreboard component
     datatable = dash_table.DataTable(
         data=df_scoreboard.to_dict('records'),
         columns=[
@@ -36,7 +40,12 @@ def create_scoreboard(difficulty, operator):
     
     return datatable
 
-def create_statistic(difficulty, operator):
+def create_statistic(difficulty: str, operator: str) -> dcc.Graph:
+    """
+    Generates a histogram of scores of all users using plotly based on the selected
+    difficulty and operator.
+    """
+    # Retrieve scores from s3
     df_scoreboard = get_scoreboard_from_s3()
 
     # Filter df
@@ -48,6 +57,7 @@ def create_statistic(difficulty, operator):
 
     return dcc.Graph(figure=fig)
 
+# Page layout
 layout = dbc.Container(fluid=True, children=[
 
     # Interval to update data every 5 mins
@@ -149,6 +159,7 @@ layout = dbc.Container(fluid=True, children=[
 
 ])
 
+# Callback functions
 @callback(
     Output('scoreboard_addition', 'children'),
     Output('scoreboard_subtraction', 'children'),
@@ -156,15 +167,29 @@ layout = dbc.Container(fluid=True, children=[
     Output('scoreboard_division', 'children'),
     Output('scoreboard_hard', 'children'),
 
+    Output('statistics_addition', 'children'),
+    Output('statistics_subtraction', 'children'),
+    Output('statistics_multiplication', 'children'),
+    Output('statistics_division', 'children'),
+    Output('statistics_hard', 'children'),
+
     Input('interval_scoreboard_statistic', 'n_intervals'),
 
     prevent_initial_call=True,
 )
-def handle_update_data(n_interval):
+def handle_update_data(n_interval: int) -> list[dash_table.DataTable]:
+    """
+    Updates scoreboard and statistics every 5 minutes.
+    """
     return [
         create_scoreboard('Normal', 'Addition'),
         create_scoreboard('Normal', 'Subtraction'),
         create_scoreboard('Normal', 'Multiplication'),
         create_scoreboard('Normal', 'Division'),
         create_scoreboard('Hard', 'Invalid'),
+        create_statistic('Normal', 'Addition'),
+        create_statistic('Normal', 'Subtraction'),
+        create_statistic('Normal', 'Multiplication'),
+        create_statistic('Normal', 'Division'),
+        create_statistic('Hard', 'Invalid'),
     ]
