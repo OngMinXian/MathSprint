@@ -1,2 +1,4 @@
-.venv\
+.venv
 mathsprint_scoreboard.csv
+__pycache__
+pages/__pycache__

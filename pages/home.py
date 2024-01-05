@@ -41,7 +41,7 @@ def generate_prompts(operator='Multiplication', difficulty='normal'):
 
     elif difficulty == 'Hard':
         for i in range(1000):
-            i, j, k = random.randint(0, 13), random.randint(0, 13), random.randint(1, 100)
+            i, j, k = random.randint(0, 12), random.randint(0, 12), random.randint(1, 100)
             
             if random.randint(0, 1):
                 prompt = f'{i} * {j}'
@@ -269,7 +269,7 @@ def handle_timer(n_interval):
 
     prevent_initial_call=True,
 )
-def handle_endgame(n_interval, store, n_clicks, brand, difficulty, operator):
+def handle_end_game(n_interval, store, n_clicks, brand, difficulty, operator):
     if (n_interval == 60 and 'score' in store) or \
     store.get('answers') == [] or \
     callback_context.args_grouping[2]['triggered']:
@@ -279,17 +279,15 @@ def handle_endgame(n_interval, store, n_clicks, brand, difficulty, operator):
         # Record score into S3
         timestamp = datetime.datetime.now()
         username = brand[1]['props']['children'].split(' ')[1]
-        scoreboard = s3_client.get_object(Bucket='mathsprint', Key='mathsprint_scoreboard.csv')['Body']
-        df_scoreboard = pd.read_csv(scoreboard)
+        df_scoreboard = get_scoreboard_from_s3()
         df_scoreboard = pd.concat([df_scoreboard, pd.DataFrame({
             'timestamp': [timestamp],
             'username': [username],
             'difficulty': [difficulty],
-            'operator': [operator],
+            'operator': [operator] if difficulty == 'Normal' else ['Invalid'],
             'score': [score],
         })], axis=0, ignore_index=True)
-        df_scoreboard.to_csv('mathsprint_scoreboard.csv', index=False)
-        s3_client.upload_file(Filename = 'mathsprint_scoreboard.csv', Bucket= 'mathsprint', Key = 'mathsprint_scoreboard.csv')
+        write_scoreboard_to_s3(df_scoreboard)
 
         return {'display':' block'}, {'display':' none'}, f'Your final score is {score}', ''
 
@@ -305,7 +303,7 @@ def handle_endgame(n_interval, store, n_clicks, brand, difficulty, operator):
 
     prevent_initial_call=True,
 )
-def handle_newgame(n_clicks):
+def handle_new_game(n_clicks):
     return {'display':' none'}, {'display':' block'}, {}
 
 @callback(
