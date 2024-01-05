@@ -151,7 +151,10 @@ def handle_username(n_enter: int, n_submit: int, username: str, brand: list) -> 
 
 # Run the app
 if __name__ == '__main__':
-    app.run()
+    app.run(
+        port=8050,
+        host='0.0.0.0'
+    )
 
 '''
 Todo:

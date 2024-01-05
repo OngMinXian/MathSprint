@@ -108,6 +108,8 @@ layout = dbc.Container(fluid=True, children=[
     dbc.Col(
         dbc.Container(fluid=True, class_name='scoreboardcard', children=[
 
+            dbc.Label('Updated every 5 minutes', style={'color': '#bfbfbf'}),
+
             # Select difficulty
             dbc.Tabs([
 

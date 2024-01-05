@@ -1,0 +1,45 @@
+.navi-colored {
+    color: #ffffff
+}
+
+.navi-colored:hover {
+    color: #595959
+}
+
+.navi-colored:focus {
+    color: #ffffff
+}
+
+.form-check-input:checked {
+    background-color: #595959;
+    border-color: #595959;
+}
+
+.operand-card {
+    font-size: 850%;
+    font-weight: bold;
+    text-align: center;
+    color: #595959;
+    margin: 5%;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 20px 50px -20px, rgba(0, 0, 0, 0.3) 0px 10px 20px -10px;
+}
+
+.operator-card {
+    font-size: 850%;
+    font-weight: bold;
+    text-align: center;
+    color: #ffffff;
+    background-color: #00e6b8;
+    margin: 5%;
+    border: 0px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.scoreboardcard {
+    border-radius: 1px;
+    border-style: none;
+    margin: 1% 0%;
+    padding: 2% 2% 2% 2%;
+    transition: max-width 500ms;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 20px 50px -20px, rgba(0, 0, 0, 0.3) 0px 10px 20px -10px;
+}
