@@ -1,6 +1,7 @@
 # Import libraries
 from dash import dash, Dash, callback, Output, Input, State
 import dash_bootstrap_components as dbc
+from dash_iconify import DashIconify
 
 # App config
 theme = dbc.themes.BOOTSTRAP
@@ -19,14 +20,53 @@ app.layout = dbc.Container(fluid=True, children=[
 
     # Username prompt
     dbc.Row([
-        dbc.Label('Welcome to MathSprint!'),
-        dbc.Input(
-            id='input_username',
-            placeholder='Enter your username',
-        ),
-        dbc.Button(
-            'Submit',
-            id='btn_username',
+        dbc.Container(
+            fluid=True,
+            children=[
+                dbc.Row([
+                    dbc.Col([
+                        dbc.Row(
+                            dbc.Label(
+                                'MATHSPRINT',
+                                style={
+                                    'color': '#ffffff',
+                                    'font-size': '8vw',
+                                    'text-align': 'center',
+                                    'font-weight': 'bold',
+                                    'text-shadow': '2px 2px 4px rgba(0, 0, 0, 0.5)',
+                                }
+                            ),
+                        ),
+                        dbc.Row([
+                            dbc.Input(
+                                id='input_username',
+                                placeholder='Enter username',
+                                style={
+                                    'width': '30vw',
+                                    'border': '0px',
+                                    'border-radius': '0px',
+                                    'box-shadow': 'inset 0 0 8px rgba(0, 0, 0, 0.3)',
+                                },
+                            ),
+                            dbc.Button(
+                                'Submit',
+                                id='btn_username',
+                                style={
+                                    'width': '5vw',
+                                    'color': '#ffffff',
+                                    'background-color': '#595959',
+                                    'border': '0px',
+                                    'border-radius': '0px',
+                                },
+                            ),
+                        ], justify='center'),
+                    ]),
+                ], align='center', style={'height': '100vh'}),
+            ],
+            style={
+                'background-color': '#00e6b8',
+                'height': '100vh',
+            },
         ),
     ], id='username_prompt', style={'display': 'block'}),
 
@@ -34,14 +74,30 @@ app.layout = dbc.Container(fluid=True, children=[
     dbc.Row([
         dbc.NavbarSimple(
             children=[
-                dbc.NavItem(dbc.NavLink('Home', href='/')),
-                dbc.NavItem(dbc.NavLink('Scoreboard', href='scoreboard')),
+                dbc.NavItem(
+                    dbc.NavLink(
+                        DashIconify(
+                            icon='mingcute:game-2-fill', 
+                            width=55,
+                            height=55,
+                        ),
+                        href='/'
+                    )
+                ),
+                dbc.NavItem(
+                    dbc.NavLink(
+                        DashIconify(
+                            icon='material-symbols:trophy', 
+                            width=55,
+                            height=55,
+                        ), 
+                        href='scoreboard'
+                    )
+                ),
             ],
-            brand=[
-                dbc.Label('MathSprint'),
-            ],
+            brand=[],
             id='navbar',
-            color='primary',
+            color='#00e6b8',
             dark=True,
             fluid=True,
         ),
@@ -73,12 +129,20 @@ def handle_username(n_enter: int, n_submit: int, username: str, brand: list) -> 
     Handles user input of username and displays it on navigation bar. The username is then retrieved
     from the navigation bar later to record score in database.
     """
-    if username == '':
+    if not username:
         username = 'anonymous'
         
     brand.append(
         dbc.Label(
-            f'Welcome {username}'
+            f'Welcome to MathSprint, {username}!',
+            style={
+                'color': '#ffffff',
+                'font-size': '150%',
+                'text-align': 'center',
+                'font-weight': 'bold',
+                'text-shadow': '2px 2px 4px rgba(0, 0, 0, 0.3)',
+                'margin-left': '2vw',
+            },
         )
     )
     return [{'display': 'none'}, {'display': 'block'}, {'display': 'block'}, brand]
@@ -86,3 +150,9 @@ def handle_username(n_enter: int, n_submit: int, username: str, brand: list) -> 
 # Run the app
 if __name__ == '__main__':
     app.run(debug=True)
+
+'''
+Todo:
+    - Set focus onto input box upon starting game
+
+'''
