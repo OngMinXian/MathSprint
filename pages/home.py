@@ -746,8 +746,8 @@ def handle_end_game(
         store['score'] = -1
 
         # Records score into S3
-        timestamp = datetime.datetime.now()
-        username = brand[0]['props']['children'].split(' ')[1]
+        timestamp = datetime.date.today()
+        username = brand[0]['props']['children'].split(' ')[3][:-1]
         df_scoreboard = get_scoreboard_from_s3()
         df_scoreboard = pd.concat([df_scoreboard, pd.DataFrame({
             'timestamp': [timestamp],

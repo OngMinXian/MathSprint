@@ -81,7 +81,8 @@ app.layout = dbc.Container(fluid=True, children=[
                             width=55,
                             height=55,
                         ),
-                        href='/'
+                        href='/',
+                        class_name='navi-colored',
                     )
                 ),
                 dbc.NavItem(
@@ -91,7 +92,8 @@ app.layout = dbc.Container(fluid=True, children=[
                             width=55,
                             height=55,
                         ), 
-                        href='scoreboard'
+                        href='scoreboard',
+                        class_name='navi-colored',
                     )
                 ),
             ],
@@ -149,7 +151,7 @@ def handle_username(n_enter: int, n_submit: int, username: str, brand: list) -> 
 
 # Run the app
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()
 
 '''
 Todo:
