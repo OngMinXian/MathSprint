@@ -15,7 +15,7 @@ def create_scoreboard(difficulty: str, operator: str) -> dash_table.DataTable:
     Generates a scoreboard in the form of a Dash DataTable depending on the selected
     difficulty and operator. Scoreboard is sorted by descending score and limited to 10 scores.
     """
-    # Retrieve scores from s3
+    # Retrieve scores
     df_scoreboard = get_scoreboard()
 
     # Filter df
@@ -82,7 +82,7 @@ def create_statistic(difficulty: str, operator: str) -> dcc.Graph:
     Generates a histogram of scores of all users using plotly based on the selected
     difficulty and operator.
     """
-    # Retrieve scores from s3
+    # Retrieve scores
     df_scoreboard = get_scoreboard()
 
     # Filter df
@@ -97,10 +97,10 @@ def create_statistic(difficulty: str, operator: str) -> dcc.Graph:
 # Page layout
 layout = dbc.Container(fluid=True, children=[
 
-    # Interval to update data every 5 mins
+    # Interval to update data every min
     dcc.Interval(
         id='interval_scoreboard_statistic',
-        interval=1000*60*5,
+        interval=1000*60,
         n_intervals=0,
     ),
 
@@ -108,7 +108,7 @@ layout = dbc.Container(fluid=True, children=[
     dbc.Col(
         dbc.Container(fluid=True, class_name='scoreboardcard', children=[
 
-            dbc.Label('Updated every 5 minutes', style={'color': '#bfbfbf'}),
+            dbc.Label('Updated every minute', style={'color': '#bfbfbf'}),
 
             # Select difficulty
             dbc.Tabs([
@@ -174,7 +174,7 @@ layout = dbc.Container(fluid=True, children=[
 )
 def handle_update_data(n_interval: int) -> list[dash_table.DataTable]:
     """
-    Updates scoreboard and statistics every 5 minutes.
+    Updates scoreboard and statistics every minute.
     """
     return [
         [create_scoreboard('Normal', 'Addition'), create_statistic('Normal', 'Addition')],
