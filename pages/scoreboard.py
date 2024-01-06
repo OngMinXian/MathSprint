@@ -169,8 +169,6 @@ layout = dbc.Container(fluid=True, children=[
     Output('score_stats_hard', 'children'),
 
     Input('interval_scoreboard_statistic', 'n_intervals'),
-
-    prevent_initial_call=True,
 )
 def handle_update_data(n_interval: int) -> list[dash_table.DataTable]:
     """
