@@ -18,5 +18,5 @@ Start game allows user to select different settings.
 ![Screenshot](screenshots/game.PNG)
 Example of a game.
 
-![Screenshot](screenshots/scoreboard_statistics.PNG.PNG)
+![Screenshot](screenshots/scoreboard_statistics.PNG)
 Leaderboard and statistics of a category (histogram will look better with more entries).
