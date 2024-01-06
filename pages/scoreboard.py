@@ -97,10 +97,10 @@ def create_statistic(difficulty: str, operator: str) -> dcc.Graph:
 # Page layout
 layout = dbc.Container(fluid=True, children=[
 
-    # Interval to update data every min
+    # Interval to update data every second
     dcc.Interval(
         id='interval_scoreboard_statistic',
-        interval=1000*60,
+        interval=1000,
         n_intervals=0,
     ),
 
@@ -174,7 +174,7 @@ layout = dbc.Container(fluid=True, children=[
 )
 def handle_update_data(n_interval: int) -> list[dash_table.DataTable]:
     """
-    Updates scoreboard and statistics every minute.
+    Updates scoreboard and statistics every second.
     """
     return [
         [create_scoreboard('Normal', 'Addition'), create_statistic('Normal', 'Addition')],
