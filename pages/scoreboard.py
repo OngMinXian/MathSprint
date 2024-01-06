@@ -5,7 +5,7 @@ import dash_bootstrap_components as dbc
 
 import plotly.express as px
 
-from s3_client import get_scoreboard_from_s3
+from scoreboard_db import get_scoreboard
 
 dash.register_page(__name__)
 
@@ -16,7 +16,7 @@ def create_scoreboard(difficulty: str, operator: str) -> dash_table.DataTable:
     difficulty and operator. Scoreboard is sorted by descending score and limited to 10 scores.
     """
     # Retrieve scores from s3
-    df_scoreboard = get_scoreboard_from_s3()
+    df_scoreboard = get_scoreboard()
 
     # Filter df
     df_scoreboard = df_scoreboard[df_scoreboard['difficulty'] == difficulty]
@@ -83,7 +83,7 @@ def create_statistic(difficulty: str, operator: str) -> dcc.Graph:
     difficulty and operator.
     """
     # Retrieve scores from s3
-    df_scoreboard = get_scoreboard_from_s3()
+    df_scoreboard = get_scoreboard()
 
     # Filter df
     df_scoreboard = df_scoreboard[df_scoreboard['difficulty'] == difficulty]

@@ -7,7 +7,7 @@ import dash
 from dash import dcc, callback, Output, Input, State, callback_context, no_update
 import dash_bootstrap_components as dbc
 
-from s3_client import get_scoreboard_from_s3, write_scoreboard_to_s3
+from scoreboard_db import get_scoreboard, write_scoreboard
 
 dash.register_page(__name__, path='/')
 
@@ -748,7 +748,7 @@ def handle_end_game(
         # Records score into S3
         timestamp = datetime.date.today()
         username = brand[0]['props']['children'].split(' ')[3][:-1]
-        df_scoreboard = get_scoreboard_from_s3()
+        df_scoreboard = write_scoreboard()
         df_scoreboard = pd.concat([df_scoreboard, pd.DataFrame({
             'timestamp': [timestamp],
             'username': [username],
@@ -756,7 +756,7 @@ def handle_end_game(
             'operator': [operator] if difficulty == 'Normal' else ['Invalid'],
             'score': [score],
         })], axis=0, ignore_index=True)
-        write_scoreboard_to_s3(df_scoreboard)
+        write_scoreboard(df_scoreboard)
 
         return {'display':' block'}, {'display':' none'}, f'Your final score is {score}', ''
 
