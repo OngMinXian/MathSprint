@@ -1,4 +1,6 @@
 # Import libraries
+import pandas as pd
+
 import dash
 from dash import dcc, callback, Output, Input, State, dash_table
 import dash_bootstrap_components as dbc
@@ -10,13 +12,21 @@ from scoreboard_db import get_scoreboard
 dash.register_page(__name__)
 
 # Helper functions
-def create_scoreboard(difficulty: str, operator: str) -> dash_table.DataTable:
+def create_scoreboard(difficulty: str, operator: str, empty: bool = False) -> dash_table.DataTable:
     """
     Generates a scoreboard in the form of a Dash DataTable depending on the selected
     difficulty and operator. Scoreboard is sorted by descending score and limited to 10 scores.
     """
     # Retrieve scores
     df_scoreboard = get_scoreboard()
+    if empty:
+        df_scoreboard = pd.DataFrame({
+            'timestamp': [],
+            'username': [],
+            'difficulty': [],
+            'operator': [],
+            'score': [],
+        })
 
     # Filter df
     df_scoreboard = df_scoreboard[df_scoreboard['difficulty'] == difficulty]
@@ -77,13 +87,21 @@ def create_scoreboard(difficulty: str, operator: str) -> dash_table.DataTable:
     
     return datatable
 
-def create_statistic(difficulty: str, operator: str) -> dcc.Graph:
+def create_statistic(difficulty: str, operator: str, empty: bool = False) -> dcc.Graph:
     """
     Generates a histogram of scores of all users using plotly based on the selected
     difficulty and operator.
     """
     # Retrieve scores
     df_scoreboard = get_scoreboard()
+    if empty:
+        df_scoreboard = pd.DataFrame({
+            'timestamp': [],
+            'username': [],
+            'difficulty': [],
+            'operator': [],
+            'score': [],
+        })
 
     # Filter df
     df_scoreboard = df_scoreboard[df_scoreboard['difficulty'] == difficulty]
@@ -108,7 +126,7 @@ layout = dbc.Container(fluid=True, children=[
     dbc.Col(
         dbc.Container(fluid=True, class_name='scoreboardcard', children=[
 
-            dbc.Label('Updated every minute', style={'color': '#bfbfbf'}),
+            dbc.Label('Updated every second', style={'color': '#bfbfbf'}),
 
             # Select difficulty
             dbc.Tabs([
@@ -121,26 +139,26 @@ layout = dbc.Container(fluid=True, children=[
                         
                         # Addition scoreboard and statistics
                         dbc.Tab([
-                            create_scoreboard('Normal', 'Addition'),
-                            create_statistic('Normal', 'Addition'),
+                            create_scoreboard('Normal', 'Addition', True),
+                            create_statistic('Normal', 'Addition', True),
                         ], label='Addition', id='score_stats_addition'),
 
                         # Subtraction scoreboard and statistics
                         dbc.Tab([
-                            create_scoreboard('Normal', 'Subtraction'),
-                            create_statistic('Normal', 'Subtraction'),
+                            create_scoreboard('Normal', 'Subtraction', True),
+                            create_statistic('Normal', 'Subtraction', True),
                         ], label='Subtraction', id='score_stats_subtraction'),
 
                         # Multiplication scoreboard and statistics
                         dbc.Tab([
-                            create_scoreboard('Normal', 'Multiplication'),
-                            create_statistic('Normal', 'Multiplication'),
+                            create_scoreboard('Normal', 'Multiplication', True),
+                            create_statistic('Normal', 'Multiplication', True),
                         ], label='Multiplication', id='score_stats_multiplication'),
 
                         # Division scoreboard and statistics
                         dbc.Tab([
-                            create_scoreboard('Normal', 'Division'),
-                            create_statistic('Normal', 'Division'),
+                            create_scoreboard('Normal', 'Division', True),
+                            create_statistic('Normal', 'Division', True),
                         ], label='Division', id='score_stats_division'),
 
                     ])
@@ -149,8 +167,8 @@ layout = dbc.Container(fluid=True, children=[
 
                 # Hard difficulty
                 dbc.Tab([
-                    create_scoreboard('Hard', 'Invalid'),
-                    create_statistic('Hard', 'Invalid'),
+                    create_scoreboard('Hard', 'Invalid', True),
+                    create_statistic('Hard', 'Invalid', True),
                 ], label='Hard', id='score_stats_hard'),
 
             ])
@@ -174,6 +192,7 @@ def handle_update_data(n_interval: int) -> list[dash_table.DataTable]:
     """
     Updates scoreboard and statistics every second.
     """
+    print('Updating scoreboard and statistics', n_interval)
     return [
         [create_scoreboard('Normal', 'Addition'), create_statistic('Normal', 'Addition')],
         [create_scoreboard('Normal', 'Subtraction'), create_statistic('Normal', 'Subtraction')],

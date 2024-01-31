@@ -1,5 +1,5 @@
 # MathSprint
-This is an application to practice basic math equations involving the 4 fundamental operators (+, -, *, /). Normal mode provides users the ability to practice specific operators while hard mode provides more experienced users the chance to test their skills. A leaderboard of top 10 scores of each category allows users to compete as they brush up their skills. The application can be found [here](http://18.139.221.150:8050/).
+This is an application to practice basic math equations involving the 4 fundamental operators (+, -, *, /). Normal mode provides users the ability to practice specific operators while hard mode provides more experienced users the chance to test their skills. A leaderboard of top 10 scores of each category allows users to compete as they brush up their skills. The application can be found [here](http://18.139.221.150:8050/) (Website is no longer hosted as of 31st Jan 2024).
 
 ## Setup
 To set up the application locally, Docker is required. Run the following commands and the application can be found on your [localhost](http://127.0.0.1:8050).
